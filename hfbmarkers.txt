@@ -1,0 +1,22 @@
+>NPC
+expressed: PAX6, RFC3, PCNA, MCM4
+
+>Neurons
+expressed: SCG2, SNAP25, SCN2A, NCAM1
+
+>Neurons excitatory
+expressed: NEUROD6, SLC17A6
+subtype of: Neurons
+
+>Neurons inhibitory
+expressed: GAD1, GAD2
+subtype of: Neurons
+
+>Astrocytes
+expressed: AQP4, S100B, GFAP
+
+>Oligodendrocyte
+expressed: OLIG1, OLIG2
+
+>Microglia
+expressed: PTPRC, ITGAM, AIF1, MEM119, IBA1

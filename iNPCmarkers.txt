@@ -1,0 +1,14 @@
+>NPC
+expressed: PAX6, RFC3, PCNA, MCM4
+
+>Early Neurons
+expressed: SOX4, SOX11, CDKN1C, DCX
+
+>Neurons
+expressed: SCG2, SNAP25, SCN2A, SLC17A6, NCAM1
+
+>Astrocytes
+expressed: AQP4, S100B, GFAP, SOX9
+
+>Oligodendrocyte
+expressed: OLIG1, OLIG2
