@@ -493,7 +493,7 @@ generate_monocle_cds <- function(sample_path) {
 ####################
 
 # --output folder for iNPC -- #
-inpc_results <- "inpc_resultsv2"
+inpc_results <- "inpc_results"
 generate_folder(inpc_results)
 
 # path to aligned files
@@ -615,21 +615,21 @@ inpc.combined_sd <- readRDS(file.path(results_folder, "inpc.combinedobject_norm_
 ##### ---Extend clusters from garnett  inpc data ---#####
 results_folder <- generate_folder(file.path(inpc_results, "classification_extend_results"))
 
-# ------add cell type classifications to integrated seurat object
+# add cell type classifications to integrated seurat object
 g_cluster_ext <- big_cds1$cluster_ext_type
 inpc.combined_sd[["garnett_cluster_extend"]] <- g_cluster_ext
 Idents(inpc.combined_sd) <- inpc.combined_sd$garnett_cluster_extend
 DimPlot(inpc.combined_sd, reduction = "umap")
 ggsave(file.path(results_folder, "garnett_clusters.png"), width = 6.5, height = 4, dpi = 500)
 
-## ------find clusters in integrated seurat object
+# find clusters in integrated seurat object
 inpc.combined_sd <- FindNeighbors(inpc.combined_sd, dims = 1:20)
 inpc.combined_sd <- FindClusters(inpc.combined_sd, resolution = 0.4) # Default values ued
 Idents(inpc.combined_sd) <- inpc.combined_sd$seurat_clusters
 DimPlot(inpc.combined_sd, reduction = "umap")
 ggsave(file.path(results_folder, "seruat_clusters.png"), width = 6.5, height = 4, dpi = 500)
 
-## ------for cells with the unknown classification assign them the cell type that is most prevelant in a seurat cluster
+# for cells with the unknown classification assign them the cell type that is most prevelant in a seurat cluster
 inpc.combined_sd[["garnett_cluster_extend_lw"]] <- inpc.combined_sd$garnett_cluster_extend
 for (cluster in unique(inpc.combined_sd$seurat_clusters)) {
     celltype_count <- c()
@@ -894,6 +894,16 @@ results_folder <- generate_folder(file.path(inpc_results, "DE_results"))
 #--make sure active assay is RNA
 DefaultAssay(inpc.combined_sd) <- "RNA"
 
+#-- Zika vs Mock conditions
+results_folder <- generate_folder(file.path(inpc_results, "DE_results", "ConditionDE"))
+
+Idents(inpc.combined_sd) <- inpc.combined_sd$orig.ident
+
+DEgenesGMzika <- get_DE_between_conditions("GM_NP_ZIKV", "GM_NP_Mock2zika", "GM", inpc.combined_sd, results_folder)
+DEgenesDDzika <- get_DE_between_conditions("DD_NP_ZIKV", "DD_NP_Mock2zika", "DD", inpc.combined_sd, results_folder)
+DEgenesINFbGM <- get_DE_between_conditions("GM_NP_IFNb", "GM_NP_Mock", "GM_IFNb", inpc.combined_sd, results_folder, fontsize = 5)
+DEgenesINFbDD <- get_DE_between_conditions("DD_NP_IFNb", "DD_NP_Mock", "DD_IFNb", inpc.combined_sd, results_folder, fontsize = 5)
+
 #-- Zika positive vs Zika negative cells with in an infected sample
 results_folder <- generate_folder(file.path(inpc_results, "DE_results", "zika+vszika-"))
 
@@ -958,15 +968,15 @@ genelisttotal <- list(
     "DE NPC GM IFN" = rownames(DEgenesifnbgmNPC)
 )
 
-svg(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenesZika+VsZika-andIFN.svg"))
-# png(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenesZika+VsZika-andIFN.png"), res = 250, units = "in", width = 8, height = 6)
+# svg(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenesZika+VsZika-andIFN.svg"))
+png(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenesZika+VsZika-andIFN.png"), res = 250, units = "in", width = 8, height = 6)
 upset(fromList(genelisttotal), sets = rev(c(
     "DE NPC GM IFN", "DE NPC DD IFN", "DE Early Neurons DD IFN", "DE Neurons DD IFN",
     "DE Astros DD IFN", "DE NPC GM Zika", "DE NPC DD Zika", "DE Early Neurons DD Zika", "DE Neurons DD Zika", "DE Astros DD Zika"
 )), keep.order = TRUE, order.by = "freq")
 dev.off()
-svg(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenes_degreeZika+VsZika-andIFN.svg"))
-# png(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenes_degreeZika+VsZika-andIFN.png"), res = 250, units = "in", width = 8, height = 5)
+# svg(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenes_degreeZika+VsZika-andIFN.svg"))
+png(file.path(inpc_results, "DE_results", "Upsetgraph_DEgenes_degreeZika+VsZika-andIFN.png"), res = 250, units = "in", width = 8, height = 5)
 upset(fromList(genelisttotal), sets = rev(c(
     "DE NPC GM IFN", "DE NPC DD IFN", "DE Early Neurons DD IFN", "DE Neurons DD IFN",
     "DE Astros DD IFN", "DE NPC GM Zika", "DE NPC DD Zika", "DE Early Neurons DD Zika", "DE Neurons DD Zika", "DE Astros DD Zika"
@@ -1435,9 +1445,9 @@ ifngenes <- c("IFIT1", "IFITM1", "IFITM3", "OAS1", "MX1", "ISG15", "USP18")
 DotPlot(inpc.combined, features = ifngenes, group.by = "celltype_sample", assay = "RNA", scale = TRUE) + coord_flip() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
     scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
-ggsave(file.path(extra_results_path, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(extra_results_path, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(extra_results_path, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300)
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300)
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300)
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300)
 
 
 #####################
