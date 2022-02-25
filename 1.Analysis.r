@@ -20,6 +20,7 @@ library(UpSetR)
 library(VennDiagram)
 library(ggrepel)
 source('SC_DE_Fig.r')
+source("heatmap3LW_function.r")
 
 ######################
 # Functions - general
@@ -2140,6 +2141,55 @@ DotPlot(brain.combined_sub, features = c(commongenes, commonviral, brz_fss, ifnb
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5, size = 9)) + theme(legend.position = "top") +
     theme(legend.text = element_text(size = 8))
 ggsave(file.path(results_folder, "DEdotplot_all_bulk_de_celltypes.png"), width = 15, height = 6.5, units = "in", dpi = 300)
+
+# re order heatmap and remove early neurons
+brain.combined_sub <- subset(x = brain.combined, idents = c(
+    "NPC_mock_48hr", "Neurons inhibitory_mock_48hr", "Neurons excitatory_mock_48hr", "Astrocytes_mock_48hr", "Oligodendrocyte_mock_48hr",
+    "NPC_BRZ_48hr", "Neurons inhibitory_BRZ_48hr", "Neurons excitatory_BRZ_48hr", "Astrocytes_BRZ_48hr", "Oligodendrocyte_BRZ_48hr",
+     "NPC_FSS_48hr",  "Neurons inhibitory_FSS_48hr", "Neurons excitatory_FSS_48hr", "Astrocytes_FSS_48hr", "Oligodendrocyte_FSS_48hr", 
+    "NPC_IFNb_48hr","Neurons inhibitory_IFNb_48hr",  "Neurons excitatory_IFNb_48hr",   "Astrocytes_IFNb_48hr", "Oligodendrocyte_IFNb_48hr"
+))
+brain.combined_sub_astro <- subset(x = brain.combined, idents = c(
+    "Astrocytes_mock_48hr", 
+    "Astrocytes_BRZ_48hr",
+    "Astrocytes_FSS_48hr",
+     "Astrocytes_IFNb_48hr"))
+brain.combined_sub@active.ident <- factor(brain.combined_sub@active.ident, levels = c(
+    "NPC_mock_48hr", "Neurons inhibitory_mock_48hr", "Neurons excitatory_mock_48hr", "Astrocytes_mock_48hr", "Oligodendrocyte_mock_48hr",
+    "NPC_BRZ_48hr", "Neurons inhibitory_BRZ_48hr", "Neurons excitatory_BRZ_48hr", "Astrocytes_BRZ_48hr", "Oligodendrocyte_BRZ_48hr",
+     "NPC_FSS_48hr",  "Neurons inhibitory_FSS_48hr", "Neurons excitatory_FSS_48hr", "Astrocytes_FSS_48hr", "Oligodendrocyte_FSS_48hr", 
+    "NPC_IFNb_48hr","Neurons inhibitory_IFNb_48hr",  "Neurons excitatory_IFNb_48hr",   "Astrocytes_IFNb_48hr", "Oligodendrocyte_IFNb_48hr"
+))
+
+ p<- DoHeatmap(brain.combined_sub,
+     features = c(commongenes, commonviral, brz_fss, ifnb_uniq), assay = "RNA", slot = "data", disp.max = 3,
+     label = FALSE, size = 5, group.colors= rep(c("#CCBB44", "#454546", "#4889ca", "#228833", "#AA3377"), 4)
+ ) + scale_fill_gradientn(colors = c("black", "red")) + theme(axis.text.y = element_text(size = 6))
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd.png"), width = 16, height = 8, dpi = 500)
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd.svg"), width = 16, height = 8, dpi = 500)
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd.pdf"), width = 16, height = 8, dpi = 500)
+
+x <- dcast(data = p$data, formula = Feature ~ Cell, value.var = "Expression")
+rownames(x) <- x$Feature
+x$Feature <- NULL
+x <- x[, names(brain.combined_sub_astro@active.ident)]
+x[is.na(x)] <- 0
+x <- as.matrix(as.data.frame(x))
+
+class(x) <- "numeric"
+
+clustered <- heatmap.L.4(x,
+    cutoff = 1, distmethod = "pearson", cexcol = 2,
+    clustermethod = "ward.D2", clusterdim = "row",
+)
+
+ p <- DoHeatmap(brain.combined_sub,
+     features = rownames(clustered$clustermatrix), assay = "RNA", slot = "data", disp.max = 3,
+     label = FALSE, size = 5, group.colors = rep(c("#CCBB44", "#454546", "#4889ca", "#228833", "#AA3377"), 4)
+ ) + scale_fill_gradientn(colors = c("black", "red")) + theme(axis.text.y = element_text(size = 6))
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd_cl.png"), width = 16, height = 8, dpi = 500)
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd_cl.svg"), width = 16, height = 8, dpi = 500)
+ ggsave(file.path(results_folder, "DEheatmap_all_bulk_de_celltypes_sub_reorderd_cl.pdf"), width = 16, height = 8, dpi = 500)
 
 
 results_folder <- generate_folder(file.path(hfb_results, "DE_results", "Celltype_ZikaVsMck"))
