@@ -284,6 +284,7 @@ get_percentages <- function(tabletemp_orig) {
     tabletemp$Freq <- tabletemp$Freq / length(tabletemp_orig)
     return(tabletemp)
 }
+
 get_zika_percentages <- function(tabletemp_orig, combined, sample) {
     zika_final <- data.frame()
     for (cell in unique(tabletemp_orig)) {
@@ -488,6 +489,39 @@ generate_monocle_cds <- function(sample_path) {
         gene_metadata = gene_meta_data
     )
     return(cds)
+}
+
+theme_Publication <- function(base_size = 14, base_family = "arial") {
+    library(grid)
+    library(ggthemes)
+    (theme_foundation(base_size = base_size)
+    + theme(
+            plot.title = element_text(
+                face = "bold",
+                size = rel(1.2), hjust = 0.5
+            ),
+            text = element_text(),
+            panel.background = element_rect(colour = NA),
+            plot.background = element_rect(colour = NA),
+            panel.border = element_rect(colour = NA),
+            axis.title = element_text(face = "bold", size = rel(1)),
+            axis.title.y = element_text(angle = 90, vjust = 2),
+            axis.title.x = element_text(vjust = -0.2),
+            axis.text = element_text(),
+            axis.line = element_line(colour = "black"),
+            axis.ticks = element_line(),
+            panel.grid.major = element_line(colour = "#f0f0f0"),
+            panel.grid.minor = element_blank(),
+            legend.key = element_rect(colour = NA),
+            legend.position = "right",
+            legend.direction = "vertical",
+            legend.key.size = unit(0.6, "cm"),
+            legend.margin = unit(0, "cm"),
+            legend.title = element_text(face = "italic"),
+            plot.margin = unit(c(10, 5, 5, 5), "mm"),
+            strip.background = element_rect(colour = "#f0f0f0", fill = "#f0f0f0"),
+            strip.text = element_text(face = "bold")
+        ))
 }
 ####################
 #iNPC analsyis
@@ -1432,24 +1466,34 @@ ggsave(file.path(results_folder, "DD_Oligo_Zika+&Zika+vsMock.png"), units = "in"
 
 ##### ---Expression of genes of interest---#####
 results_folder <- generate_folder(file.path(inpc_results, "DotPlots"))
-genes <- c("DDX58", "IFIH1", "TLR3", "TLR4", "IRF3", "IRF5", "IRF7", "IFNAR1", "IFNAR2", "TLR7", "NFKB1") # IFH1=MDA5, DDX58=RIGI
+genes <- c("DDX58", "IFIH1", "TLR3", "TLR4", "IRF3", "IRF5", "IRF7", "TLR7", "NFKB1", "TBK1", "TANK", "TRIF", "TRAF3", "IKK") # IFH1=MDA5, DDX58=RIGI
 
-DotPlot(inpc.combined_sd, features = genes, group.by = "cell_condition", assay = "RNA", scale = TRUE) + coord_flip() +
+DotPlot(inpc.combined_sd, features = genes, group.by = "celltype_idents", assay = "RNA", scale = TRUE) + coord_flip() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + 
     scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.png"), width = 9, height = 6, units = "in", dpi = 500)
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.svg"), width = 9, height = 6, units = "in", dpi = 500)
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.pdf"), width = 9, height = 6, units = "in", dpi = 500)
+
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.png"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.svg"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.pdf"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
 
 
-ifngenes <- c("IFIT1", "IFITM1", "IFITM3", "OAS1", "MX1", "ISG15", "USP18")
-DotPlot(inpc.combined, features = ifngenes, group.by = "celltype_sample", assay = "RNA", scale = TRUE) + coord_flip() +
+ifngenes <- c("IFIT1", "IFITM1", "IFITM3", "OAS1", "MX1", "ISG15", "USP18", "IFNAR1", "IFNAR2")
+DotPlot(inpc.combined_sd, features = ifngenes, group.by = "celltype_idents", 
+    assay = "RNA", scale = TRUE) + coord_flip() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
     scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300)
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
 
+combinedgenes <- c(genes, ifngenes)
+DotPlot(inpc.combined_sd, features = combinedgenes, group.by = "celltype_idents", 
+    assay = "RNA", scale = TRUE) + coord_flip() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.png"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.svg"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.pdf"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
 
 #####################
 # Functions --HFB
@@ -2222,6 +2266,7 @@ DEONIFbvsMock <- get_DE_between_conditions("Oligodendrocyte_IFNb_48hr", "Oligode
 DEOBRZvsMock <- get_DE_between_conditions("Oligodendrocyte_BRZ_48hr", "Oligodendrocyte_mock_48hr", "Oligodendrocyte_BRZvsMock", brain.combined, results_folder, fontsize = 9)
 DEOFSSvsMock <- get_DE_between_conditions("Oligodendrocyte_FSS_48hr", "Oligodendrocyte_mock_48hr", "Oligodendrocyte_FSSvsMock", brain.combined, results_folder, fontsize = 9)
 
+## - upset plot with out oligodendrocytes
 genelisttotal <- list(
     "DE Astros BRZ" = rownames(DEABRZvsMock), "DE Astros FSS" = rownames(DEAFSSvsMock),
     "DE Astros IFN" = rownames(DEAIFbvsMock),
@@ -2249,25 +2294,67 @@ upset(fromList(genelisttotal), sets = rev(c(
 )), keep.order = TRUE,  order.by = "freq")
 dev.off()
 
+## - upset plot with oligodendrocytes 
+genelisttotal <- list(
+    "DE Oligos BRZ" = rownames(DEOBRZvsMock), "DE Oligos FSS" = rownames(DEOFSSvsMock),
+    "DE Oligos IFN" = rownames(DEONIFbvsMock),
+    "DE Astros BRZ" = rownames(DEABRZvsMock), "DE Astros FSS" = rownames(DEAFSSvsMock),
+    "DE Astros IFN" = rownames(DEAIFbvsMock),
+    "DE NeuronsIn BRZ" = rownames(DENIBRZvsMock), "DE NeuronsIn FSS" = rownames(DENIFSSvsMock),
+    "DE NeuronsIn IFN" = rownames(DENIIFNbvsMock),
+    "DE NeuronsEx BRZ" = rownames(DENEBRZvsMock), "DE NeuronsEx FSS" = rownames(DENEFSSvsMock),
+    "DE NeuronsEx IFN" = rownames(DENEIFNbvsMock),
+    "DE NPC BRZ" = rownames(DENPCsBRZvsMock), "DE NPC FSS" = rownames(DENPCsFSSvsMock),
+    "DE NPC IFN" = rownames(DENPCsIFNbvsMock)
+)
+
+png(file.path(hfb_results, "DE_results", "Upsetgraph_DEgenes_degreewithOligos.png"), res = 250, units = "in", width = 8, height = 5)
+upset(fromList(genelisttotal), sets = rev(c(
+    "DE NPC IFN", "DE NPC BRZ", "DE NPC FSS", "DE NeuronsIn IFN", "DE NeuronsIn BRZ", "DE NeuronsIn FSS", "DE NeuronsEx IFN",
+    "DE NeuronsEx BRZ", "DE NeuronsEx FSS", "DE Astros IFN",
+    "DE Astros BRZ", "DE Astros FSS", "DE Oligos IFN",
+    "DE Oligos BRZ", "DE Oligos FSS"
+)), keep.order = TRUE, order.by = "degree")
+dev.off()
+svg(file.path(hfb_results, "DE_results", "Upsetgraph_DEgeneswithOligos.svg"))
+# png(file.path(hfb_results, "DE_results", "Upsetgraph_DEgenes.png"), res = 250, units = "in", width = 8, height = 5)
+upset(fromList(genelisttotal), sets = rev(c(
+    "DE NPC IFN", "DE NPC BRZ", "DE NPC FSS", "DE NeuronsIn IFN", "DE NeuronsIn BRZ", "DE NeuronsIn FSS", "DE NeuronsEx IFN",
+    "DE NeuronsEx BRZ", "DE NeuronsEx FSS", "DE Astros IFN",
+    "DE Astros BRZ", "DE Astros FSS", "DE Oligos IFN",
+    "DE Oligos BRZ", "DE Oligos FSS"
+)), keep.order = TRUE,  order.by = "freq")
+dev.off()
+
 
 ##### ---Expression of genes of interest---#####
 
 results_folder <- generate_folder(file.path(hfb_results, "DotPlots"))
-genes <- c("DDX58", "IFIH1", "TLR3", "TLR4", "IRF3", "IRF5", "IRF7", "IFNAR1", "IFNAR2", "TLR7", "NFKB1") # IFH1=MDA5, DDX58=RIGI
+genes <- c("DDX58", "IFIH1", "TLR3", "TLR4", "IRF3", "IRF5", "IRF7", "TLR7", "NFKB1", "TBK1", "TANK", "TRIF", "TRAF3", "IKK") # IFH1=MDA5, DDX58=RIGI
 
 DotPlot(brain.combined, features = genes, group.by = "celltype_idents", assay = "RNA", scale = TRUE) + coord_flip() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) + 
     scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
 
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.png"), width = 9, height = 6, units = "in", dpi = 500)
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.svg"), width = 9, height = 6, units = "in", dpi = 500)
-ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.pdf"), width = 9, height = 6, units = "in", dpi = 500)
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.png"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.svg"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
+ggsave(file.path(results_folder, "PRRS_dotplot_scaled4pub.pdf"), width = 9, height = 6, units = "in", dpi = 500, bg="white")
 
 
-ifngenes <- c("IFIT1", "IFITM1", "IFITM3", "OAS1", "MX1", "ISG15", "USP18")
-DotPlot(brain.combined, features = ifngenes, group.by = "celltype_idents", assay = "RNA", scale = TRUE) + coord_flip() +
+ifngenes <- c("IFIT1", "IFITM1", "IFITM3", "OAS1", "MX1", "ISG15", "USP18", "IFNAR1", "IFNAR2")
+DotPlot(brain.combined, features = ifngenes, group.by = "celltype_idents", 
+    assay = "RNA", scale = TRUE) + coord_flip() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
     scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300)
-ggsave(file.path(results_folder, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300)
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.png"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.svg"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "IFIT_dotplot_scaled.pdf"), width = 9, height = 6, units = "in", dpi = 300, bg="white")
+
+combinedgenes <- c(genes, ifngenes)
+DotPlot(brain.combined, features = combinedgenes, group.by = "celltype_idents", 
+    assay = "RNA", scale = TRUE) + coord_flip() +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+    scale_colour_gradient2(midpoint = 0, mid = "gray", high = "red", low = "blue")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.png"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.svg"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
+ggsave(file.path(results_folder, "combined_dotplot_scaled.pdf"), width = 9, height = 7, units = "in", dpi = 300, bg="white")
