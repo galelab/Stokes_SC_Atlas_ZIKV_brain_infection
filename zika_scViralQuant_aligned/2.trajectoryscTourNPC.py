@@ -1,4 +1,4 @@
-# activate newer version of python 3.8 source /share/lwhitmo/pythonvenvs/py3.8venv/bin/activate
+#python 3.8
 import sctour as sct
 import scanpy as sc
 import numpy as np
@@ -6,8 +6,8 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
-countmatrix='/share/lwhitmo/projects/Stokes_HFB_iNPC_Analysis/zika_scViralQuant_aligned/inpc_results/Convert4SCtour/counts_npc.txt'
-metadata='/share/lwhitmo/projects/Stokes_HFB_iNPC_Analysis/zika_scViralQuant_aligned/inpc_results/Convert4SCtour/metadata_npc.csv'
+countmatrix='counts_npc.txt'
+metadata='metadata_npc.csv'
 results_folder='2.TrajectoryAnalysisSCtouriNPC_NPC/'
 
 adata= sc.read(countmatrix).T
