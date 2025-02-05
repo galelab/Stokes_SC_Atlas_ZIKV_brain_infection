@@ -85,7 +85,7 @@ theme_sctour <- function(base_size = 14, base_family = "helvetica") {
 input_folder <- "2.TrajectoryAnalysisSCtouriNPC_NPC"
 results_folder <- file.path("2.TrajectoryAnalysisSCtouriNPC_NPC", "figs")
 generate_folder(results_folder)
-inpc <- readRDS("/share/lwhitmo/projects/Stokes_HFB_iNPC_Analysis/zika_scViralQuant_aligned/inpc_results/Convert4SCtour/inpc.combinedsub.RDS")
+inpc <- readRDS("inpc.combinedsub.RDS")
 df <- read.csv(file.path(input_folder, "umapcoordinates.csv"), row.names=1)
 df$ptime <- as.numeric(df$ptime)
 
